@@ -1,9 +1,15 @@
 #!/usr/bin/env node
 const fs = require('fs')
 const path = require('path')
+const resolve = (...filePaths) => path.resolve(process.cwd(), ...filePaths)
+
 const config = require(resolve('./config'))
 
-const resolve = (...filePaths) => path.resolve(process.cwd(), ...filePaths)
+if (typeof config === 'undefined') {
+    console.error('config not exist')
+    process.exit(1)
+}
+
 const noop = () => {}
 
 /**
@@ -32,18 +38,13 @@ const mkdir = function(dir) {
  * @param {String} filename 文件名字
  */
 const writeFile = function(filename) {
-    if (!isExist(filename)) {
+    if (!isExist(`${filename}.vue`)) {
         let template = fs.createReadStream(path.resolve(__dirname, 'template.vue'))
         let component = fs.createWriteStream(filename)
         template.pipe(component)
     }
 }
 
-module.exports = {
-    isExist,
-    mkdir,
-    writeFile
-}
 
 
 config.forEach(item => {
@@ -52,7 +53,7 @@ config.forEach(item => {
 
     mkdir(resolve(dir))
     components.forEach(component => {
-        writeFile(resolve(dir, `component`))
+        writeFile(resolve(dir, `${component}.vue`))
     })
 })
 
